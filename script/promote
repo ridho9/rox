@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+cargo build --bin rox
+export PATH=$(pwd)/target/debug:$PATH
+cram ./test -iy
