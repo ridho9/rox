@@ -1,0 +1,15 @@
+program      =   { SOI ~ expr ~ EOI }
+  expr       =   { prefix? ~ primary ~ (infix ~ prefix? ~ primary )* }
+    infix    =  _{ add | sub | mul | div }
+      add    =   { "+" } // Addition
+      sub    =   { "-" } // Subtraction
+      mul    =   { "*" } // Multiplication
+      div    =   { "/" } // Division
+    prefix   =  _{ neg }
+      neg    =   { "-" } // Negation
+    // postfix  =  _{ fac }
+    //   fac    =   { "!" } // Factorial
+    primary  =  _{ number | "(" ~ expr ~ ")" }
+      number    =  @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT+)? }
+
+WHITESPACE   =  _{ " " | "\t" | NEWLINE }
