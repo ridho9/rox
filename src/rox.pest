@@ -1,15 +1,17 @@
 program      =   { SOI ~ expr ~ EOI }
   expr       =   { prefix? ~ primary ~ (infix ~ prefix? ~ primary )* }
-    infix    =  _{ add | sub | mul | div }
+    infix    =  _{ add | sub | mul | div | eqeq | neq }
       add    =   { "+" } // Addition
       sub    =   { "-" } // Subtraction
       mul    =   { "*" } // Multiplication
       div    =   { "/" } // Division
+      eqeq   =   { "==" }
+      neq   =    { "!=" }
     prefix   =  _{ neg }
       neg    =   { "-" } // Negation
-    // postfix  =  _{ fac }
-    //   fac    =   { "!" } // Factorial
-    primary  =  _{ number | "(" ~ expr ~ ")" }
-      number    =  @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT+)? }
+    primary  =  _{ number | bool | nil | "(" ~ expr ~ ")" }
+      number =  @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT+)? }
+      bool   =   { "true" | "false" }
+      nil    =   { "nil" }
 
 WHITESPACE   =  _{ " " | "\t" | NEWLINE }
