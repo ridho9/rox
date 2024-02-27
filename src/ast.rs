@@ -1,5 +1,11 @@
-#[derive(Debug)]
-pub enum Expr {
+#[derive(Debug, Clone)]
+pub struct Expr {
+    pub kind: ExprKind,
+    pub linecol: (usize, usize),
+}
+
+#[derive(Debug, Clone)]
+pub enum ExprKind {
     Nil,
     Bool(bool),
     Number(f64),
@@ -7,7 +13,7 @@ pub enum Expr {
     UnaryOp(UnaryOp, Box<Expr>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BinaryOp {
     Add,
     Sub,
@@ -17,7 +23,7 @@ pub enum BinaryOp {
     Neq,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum UnaryOp {
     Neg,
 }

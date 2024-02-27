@@ -1,8 +1,11 @@
 use lazy_static::lazy_static;
-use pest::{iterators::Pairs, pratt_parser::PrattParser};
+use pest::{
+    iterators::{Pair, Pairs},
+    pratt_parser::PrattParser,
+};
 use pest_derive::Parser;
 
-use crate::ast::{BinaryOp, Expr, UnaryOp};
+use crate::ast::{BinaryOp, Expr, ExprKind, UnaryOp};
 
 #[derive(Parser)]
 #[grammar = "rox.pest"]
@@ -22,14 +25,19 @@ lazy_static! {
 
 pub fn parse_expr(pairs: Pairs<Rule>) -> Expr {
     PRATT_PARSER
-        .map_primary(|primary| match primary.as_rule() {
-            Rule::number => Expr::Number(primary.as_str().parse().unwrap()),
-            Rule::expr => parse_expr(primary.into_inner()),
-            Rule::bool => Expr::Bool(primary.as_str().parse().unwrap()),
-            Rule::nil => Expr::Nil,
-            r => unreachable!("primary rule {:?}", r),
+        .map_primary(|primary| {
+            let linecol = primary.line_col();
+            let kind = match primary.as_rule() {
+                Rule::number => ExprKind::Number(primary.as_str().parse().unwrap()),
+                Rule::expr => parse_expr(primary.into_inner()).kind,
+                Rule::bool => ExprKind::Bool(primary.as_str().parse().unwrap()),
+                Rule::nil => ExprKind::Nil,
+                r => unreachable!("primary rule {:?}", r),
+            };
+            Expr { kind, linecol }
         })
         .map_infix(|lhs, op, rhs| {
+            let linecol = lhs.linecol;
             let op = match op.as_rule() {
                 Rule::add => BinaryOp::Add,
                 Rule::sub => BinaryOp::Sub,
@@ -39,14 +47,17 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> Expr {
                 Rule::neq => BinaryOp::Neq,
                 _ => unreachable!(),
             };
-            Expr::BinaryOp(Box::new(lhs), op, Box::new(rhs))
+            let kind = ExprKind::BinaryOp(Box::new(lhs), op, Box::new(rhs));
+            Expr { kind, linecol }
         })
         .map_prefix(|op, rhs| {
+            let linecol = op.line_col();
             let op = match op.as_rule() {
                 Rule::neg => UnaryOp::Neg,
                 _ => unreachable!(),
             };
-            Expr::UnaryOp(op, Box::new(rhs))
+            let kind = ExprKind::UnaryOp(op, Box::new(rhs));
+            Expr { kind, linecol }
         })
         .parse(pairs)
 }
