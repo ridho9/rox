@@ -13,19 +13,17 @@ fn main() -> io::Result<()> {
         match RoxParser::parse(Rule::program, &line?) {
             Ok(mut pairs) => {
                 // println!("{:#?}", pairs);
-                println!(
-                    "Parsed: {:#?}",
-                    parse_expr(
-                        // inner of expr
-                        pairs
-                            .next() // program
-                            .unwrap()
-                            .into_inner()
-                            .next() // expr
-                            .unwrap()
-                            .into_inner()
-                    )
+                let ast = parse_expr(
+                    // inner of expr
+                    pairs
+                        .next() // program
+                        .unwrap()
+                        .into_inner()
+                        .next() // expr
+                        .unwrap()
+                        .into_inner(),
                 );
+                ast.print()
             }
             Err(e) => {
                 eprintln!("Parse failed: {}", e);

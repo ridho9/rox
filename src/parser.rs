@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use pest::{iterators::Pairs, pratt_parser::PrattParser};
 use pest_derive::Parser;
 
-use crate::ast::{BinaryOp, Node, NodeList, UnaryOp};
+use crate::ast::{BinaryOp, Metadata, Node, NodeList, UnaryOp, AST};
 
 #[derive(Parser)]
 #[grammar = "rox.pest"]
@@ -20,9 +20,12 @@ lazy_static! {
     };
 }
 
-pub fn parse_expr(pairs: Pairs<Rule>) -> NodeList {
+pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
     PRATT_PARSER
         .map_primary(|primary| {
+            let meta = Metadata {
+                linecol: primary.line_col(),
+            };
             let node = match primary.as_rule() {
                 Rule::expr => return parse_expr(primary.into_inner()),
                 Rule::number => Node::Number(primary.as_str().parse().unwrap()),
@@ -30,9 +33,15 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> NodeList {
                 Rule::nil => Node::Nil,
                 r => unreachable!("primary rule {:?}", r),
             };
-            NodeList::from_node(node)
+            AST {
+                list: NodeList(vec![node]),
+                meta: vec![meta],
+            }
         })
         .map_infix(|mut lhs, op, rhs| {
+            let meta = Metadata {
+                linecol: op.line_col(),
+            };
             let op = match op.as_rule() {
                 Rule::add => BinaryOp::Add,
                 Rule::sub => BinaryOp::Sub,
@@ -45,16 +54,19 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> NodeList {
             let lhs_ref = lhs.noderef();
             let rhs_ref = lhs.append(rhs);
             let node = Node::BinaryOp(op, lhs_ref, rhs_ref);
-            lhs.push_node(node);
+            lhs.push(node, meta);
             lhs
         })
         .map_prefix(|op, mut rhs| {
+            let meta = Metadata {
+                linecol: op.line_col(),
+            };
             let op = match op.as_rule() {
                 Rule::neg => UnaryOp::Neg,
                 _ => unreachable!(),
             };
             let node = Node::UnaryOp(op, rhs.noderef());
-            rhs.push_node(node);
+            rhs.push(node, meta);
             rhs
         })
         .parse(pairs)
