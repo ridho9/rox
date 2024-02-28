@@ -14,15 +14,16 @@ prefix = _{ neg | not }
 neg    =  { "-" }
 not    =  { "!" }
 
-primary = _{ number | bool | nil | "(" ~ expr ~ ")" | string }
-number  = @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT+)? }
-bool    =  { "true" | "false" }
-nil     =  { "nil" }
-string  = ${ "\"" ~ inner ~ "\"" }
-inner   = @{ char* }
-char    =  {
-    !("\"" | "\\") ~ ANY
-  | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+primary    = _{ number | bool | nil | "(" ~ expr ~ ")" | string }
+number     = @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT+)? }
+bool       =  { "true" | "false" }
+nil        =  { "nil" }
+string     = ${ "\"" ~ inner ~ "\"" }
+inner      = ${ char* }
+char       =  { char_noesc | char_esc }
+char_noesc =  { !("\"" | "\\") ~ ANY }
+char_esc   =  {
+    "\\" ~ ("\"" | "\\" | "/" | "n" | "r" | "t")
 }
 
 WHITESPACE = _{ " " | "\t" | NEWLINE }

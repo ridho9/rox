@@ -17,7 +17,7 @@ impl Debug for Node {
             Self::Nil => write!(f, "Lit nil"),
             Self::Bool(arg0) => write!(f, "Lit {}", arg0),
             Self::Number(arg0) => write!(f, "Lit {}", arg0),
-            Self::String(arg0) => write!(f, "Lit {}", arg0),
+            Self::String(arg0) => write!(f, "Lit {:?}", arg0),
             Self::BinaryOp(arg0, arg1, arg2) => {
                 write!(f, "Binary {:?} {:?} {:?}", arg0, arg1, arg2)
             }

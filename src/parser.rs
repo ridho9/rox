@@ -31,9 +31,30 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
                 Rule::number => Node::Number(primary.as_str().parse().unwrap()),
                 Rule::bool => Node::Bool(primary.as_str().parse().unwrap()),
                 Rule::nil => Node::Nil,
-                Rule::string => {
-                    Node::String(primary.into_inner().next().unwrap().as_str().to_string())
-                }
+                Rule::string => Node::String({
+                    let mut result = String::new();
+                    let tree = primary.into_inner().next().unwrap().into_inner();
+                    for ch in tree {
+                        let inner = ch.into_inner().next().unwrap();
+                        match inner.as_rule() {
+                            Rule::char_noesc => result.push_str(inner.as_str()),
+                            Rule::char_esc => {
+                                let conv = match inner.as_str() {
+                                    r#"\""# => "\"",
+                                    r#"\\"# => "\\",
+                                    r#"\/"# => "/",
+                                    r#"\n"# => "\n",
+                                    r#"\r"# => "\r",
+                                    r#"\t"# => "\t",
+                                    _ => unreachable!(),
+                                };
+                                result.push_str(conv)
+                            }
+                            _ => unreachable!(),
+                        }
+                    }
+                    result
+                }),
                 r => unreachable!("primary rule {:?}", r),
             };
             AST {

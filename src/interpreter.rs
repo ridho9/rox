@@ -1,3 +1,4 @@
+use std::string::String;
 use thiserror::Error;
 
 use crate::ast::{Node, NodeRef, AST};
@@ -14,13 +15,17 @@ impl Interpreter {
     }
 
     fn run_ast(&mut self, ast: &AST, curref: NodeRef) -> Result<Value, RuntimeError> {
-        use Node::*;
         let node = ast.at(curref);
         let result = match node {
-            Nil => Value::Nil,
-            Bool(b) => Value::Bool(*b),
-            Number(n) => Value::Number(*n),
-            String(s) => Value::String(s.clone()),
+            Node::Nil => Value::Nil,
+            Node::Bool(b) => Value::Bool(*b),
+            Node::Number(n) => Value::Number(*n),
+            Node::String(s) => {
+                let s_parsed = String::new();
+
+                let v = Value::String(s_parsed);
+                v
+            }
             _ => unimplemented!("{:?}", node),
         };
         Ok(result)
