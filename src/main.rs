@@ -13,7 +13,7 @@ fn main() -> io::Result<()> {
     for line in io::stdin().lock().lines() {
         match RoxParser::parse(Rule::program, &line?) {
             Ok(mut pairs) => {
-                println!("{:#?}", pairs);
+                // println!("{:#?}", pairs);
                 let ast = parse_expr(
                     pairs
                         .next() // program
@@ -27,7 +27,7 @@ fn main() -> io::Result<()> {
 
                 let mut intp = Interpreter::new();
                 let result = intp.exec_ast(&ast).unwrap();
-                println!(" = {:?}", result);
+                println!("====>:\n{}", result);
             }
             Err(e) => {
                 eprintln!("Parse failed: {}", e);

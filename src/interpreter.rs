@@ -1,4 +1,4 @@
-use std::string::String;
+use std::{fmt::Display, string::String};
 use thiserror::Error;
 
 use crate::ast::{Node, NodeRef, AST};
@@ -20,12 +20,7 @@ impl Interpreter {
             Node::Nil => Value::Nil,
             Node::Bool(b) => Value::Bool(*b),
             Node::Number(n) => Value::Number(*n),
-            Node::String(s) => {
-                let s_parsed = String::new();
-
-                let v = Value::String(s_parsed);
-                v
-            }
+            Node::String(s) => Value::String(s.to_string()),
             _ => unimplemented!("{:?}", node),
         };
         Ok(result)
@@ -38,6 +33,17 @@ pub enum Value {
     Bool(bool),
     Number(f64),
     String(String),
+}
+
+impl Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Value::Nil => write!(f, "nil"),
+            Value::Bool(b) => write!(f, "{}", b),
+            Value::Number(n) => write!(f, "{}", n),
+            Value::String(s) => write!(f, "{}", s),
+        }
+    }
 }
 
 #[derive(Error, Debug)]
