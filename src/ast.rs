@@ -1,16 +1,16 @@
 #[derive(Debug, Clone)]
-pub struct Expr {
-    pub kind: ExprKind,
+pub struct Node {
+    pub kind: NodeKind,
     pub linecol: (usize, usize),
 }
 
 #[derive(Debug, Clone)]
-pub enum ExprKind {
+pub enum NodeKind {
     Nil,
     Bool(bool),
     Number(f64),
-    BinaryOp(Box<Expr>, BinaryOp, Box<Expr>),
-    UnaryOp(UnaryOp, Box<Expr>),
+    BinaryOp(Box<Node>, BinaryOp, Box<Node>),
+    UnaryOp(UnaryOp, Box<Node>),
 }
 
 #[derive(Debug, Clone)]

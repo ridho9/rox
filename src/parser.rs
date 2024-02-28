@@ -5,7 +5,7 @@ use pest::{
 };
 use pest_derive::Parser;
 
-use crate::ast::{BinaryOp, Expr, ExprKind, UnaryOp};
+use crate::ast::{BinaryOp, Node, NodeKind, UnaryOp};
 
 #[derive(Parser)]
 #[grammar = "rox.pest"]
@@ -23,18 +23,18 @@ lazy_static! {
     };
 }
 
-pub fn parse_expr(pairs: Pairs<Rule>) -> Expr {
+pub fn parse_expr(pairs: Pairs<Rule>) -> Node {
     PRATT_PARSER
         .map_primary(|primary| {
             let linecol = primary.line_col();
             let kind = match primary.as_rule() {
-                Rule::number => ExprKind::Number(primary.as_str().parse().unwrap()),
+                Rule::number => NodeKind::Number(primary.as_str().parse().unwrap()),
                 Rule::expr => parse_expr(primary.into_inner()).kind,
-                Rule::bool => ExprKind::Bool(primary.as_str().parse().unwrap()),
-                Rule::nil => ExprKind::Nil,
+                Rule::bool => NodeKind::Bool(primary.as_str().parse().unwrap()),
+                Rule::nil => NodeKind::Nil,
                 r => unreachable!("primary rule {:?}", r),
             };
-            Expr { kind, linecol }
+            Node { kind, linecol }
         })
         .map_infix(|lhs, op, rhs| {
             let linecol = lhs.linecol;
@@ -47,8 +47,8 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> Expr {
                 Rule::neq => BinaryOp::Neq,
                 _ => unreachable!(),
             };
-            let kind = ExprKind::BinaryOp(Box::new(lhs), op, Box::new(rhs));
-            Expr { kind, linecol }
+            let kind = NodeKind::BinaryOp(Box::new(lhs), op, Box::new(rhs));
+            Node { kind, linecol }
         })
         .map_prefix(|op, rhs| {
             let linecol = op.line_col();
@@ -56,8 +56,8 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> Expr {
                 Rule::neg => UnaryOp::Neg,
                 _ => unreachable!(),
             };
-            let kind = ExprKind::UnaryOp(op, Box::new(rhs));
-            Expr { kind, linecol }
+            let kind = NodeKind::UnaryOp(op, Box::new(rhs));
+            Node { kind, linecol }
         })
         .parse(pairs)
 }
