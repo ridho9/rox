@@ -12,7 +12,7 @@ fn main() -> io::Result<()> {
     for line in io::stdin().lock().lines() {
         match RoxParser::parse(Rule::program, &line?) {
             Ok(mut pairs) => {
-                println!("{:#?}", pairs);
+                // println!("{:#?}", pairs);
                 println!(
                     "Parsed: {:#?}",
                     parse_expr(
@@ -28,7 +28,7 @@ fn main() -> io::Result<()> {
                 );
             }
             Err(e) => {
-                eprintln!("Parse failed: {:?}", e);
+                eprintln!("Parse failed: {}", e);
             }
         }
     }

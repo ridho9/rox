@@ -1,11 +1,8 @@
 use lazy_static::lazy_static;
-use pest::{
-    iterators::{Pair, Pairs},
-    pratt_parser::PrattParser,
-};
+use pest::{iterators::Pairs, pratt_parser::PrattParser};
 use pest_derive::Parser;
 
-use crate::ast::{BinaryOp, Node, NodeKind, UnaryOp};
+use crate::ast::{BinaryOp, Node, NodeList, UnaryOp};
 
 #[derive(Parser)]
 #[grammar = "rox.pest"]
@@ -23,21 +20,19 @@ lazy_static! {
     };
 }
 
-pub fn parse_expr(pairs: Pairs<Rule>) -> Node {
+pub fn parse_expr(pairs: Pairs<Rule>) -> NodeList {
     PRATT_PARSER
         .map_primary(|primary| {
-            let linecol = primary.line_col();
-            let kind = match primary.as_rule() {
-                Rule::number => NodeKind::Number(primary.as_str().parse().unwrap()),
-                Rule::expr => parse_expr(primary.into_inner()).kind,
-                Rule::bool => NodeKind::Bool(primary.as_str().parse().unwrap()),
-                Rule::nil => NodeKind::Nil,
+            let node = match primary.as_rule() {
+                Rule::expr => return parse_expr(primary.into_inner()),
+                Rule::number => Node::Number(primary.as_str().parse().unwrap()),
+                Rule::bool => Node::Bool(primary.as_str().parse().unwrap()),
+                Rule::nil => Node::Nil,
                 r => unreachable!("primary rule {:?}", r),
             };
-            Node { kind, linecol }
+            NodeList::from_node(node)
         })
-        .map_infix(|lhs, op, rhs| {
-            let linecol = lhs.linecol;
+        .map_infix(|mut lhs, op, rhs| {
             let op = match op.as_rule() {
                 Rule::add => BinaryOp::Add,
                 Rule::sub => BinaryOp::Sub,
@@ -47,17 +42,20 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> Node {
                 Rule::neq => BinaryOp::Neq,
                 _ => unreachable!(),
             };
-            let kind = NodeKind::BinaryOp(Box::new(lhs), op, Box::new(rhs));
-            Node { kind, linecol }
+            let lhs_ref = lhs.noderef();
+            let rhs_ref = lhs.append(rhs);
+            let node = Node::BinaryOp(op, lhs_ref, rhs_ref);
+            lhs.push_node(node);
+            lhs
         })
-        .map_prefix(|op, rhs| {
-            let linecol = op.line_col();
+        .map_prefix(|op, mut rhs| {
             let op = match op.as_rule() {
                 Rule::neg => UnaryOp::Neg,
                 _ => unreachable!(),
             };
-            let kind = NodeKind::UnaryOp(op, Box::new(rhs));
-            Node { kind, linecol }
+            let node = Node::UnaryOp(op, rhs.noderef());
+            rhs.push_node(node);
+            rhs
         })
         .parse(pairs)
 }
