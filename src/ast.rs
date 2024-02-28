@@ -1,11 +1,12 @@
 use std::fmt::Debug;
 use std::{ops::Add, vec};
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub enum Node {
     Nil,
     Bool(bool),
     Number(f64),
+    String(String),
     BinaryOp(BinaryOp, NodeRef, NodeRef),
     UnaryOp(UnaryOp, NodeRef),
 }
@@ -16,6 +17,7 @@ impl Debug for Node {
             Self::Nil => write!(f, "Lit nil"),
             Self::Bool(arg0) => write!(f, "Lit {}", arg0),
             Self::Number(arg0) => write!(f, "Lit {}", arg0),
+            Self::String(arg0) => write!(f, "Lit {}", arg0),
             Self::BinaryOp(arg0, arg1, arg2) => {
                 write!(f, "Binary {:?} {:?} {:?}", arg0, arg1, arg2)
             }
@@ -35,6 +37,7 @@ impl Add<usize> for Node {
             Number(n) => Number(n),
             BinaryOp(op, lhs, rhs) => BinaryOp(op, lhs + t, rhs + t),
             UnaryOp(op, i) => UnaryOp(op, i + t),
+            String(s) => String(s),
         }
     }
 }
@@ -52,6 +55,7 @@ pub enum BinaryOp {
 #[derive(Debug, Clone, Copy)]
 pub enum UnaryOp {
     Neg,
+    Not,
 }
 
 #[derive(Clone, Copy)]

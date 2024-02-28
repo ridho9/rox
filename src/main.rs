@@ -12,7 +12,7 @@ fn main() -> io::Result<()> {
     for line in io::stdin().lock().lines() {
         match RoxParser::parse(Rule::program, &line?) {
             Ok(mut pairs) => {
-                // println!("{:#?}", pairs);
+                println!("{:#?}", pairs);
                 let ast = parse_expr(
                     // inner of expr
                     pairs

@@ -16,7 +16,7 @@ lazy_static! {
             .op(Op::infix(Rule::eqeq, Left) | Op::infix(Rule::neq, Left))
             .op(Op::infix(Rule::add, Left) | Op::infix(Rule::sub, Left))
             .op(Op::infix(Rule::mul, Left) | Op::infix(Rule::div, Left))
-            .op(Op::prefix(Rule::neg))
+            .op(Op::prefix(Rule::neg) | Op::prefix(Rule::not))
     };
 }
 
@@ -31,6 +31,7 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
                 Rule::number => Node::Number(primary.as_str().parse().unwrap()),
                 Rule::bool => Node::Bool(primary.as_str().parse().unwrap()),
                 Rule::nil => Node::Nil,
+                Rule::string => Node::String(primary.as_str().parse().unwrap()),
                 r => unreachable!("primary rule {:?}", r),
             };
             AST {
@@ -63,6 +64,7 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
             };
             let op = match op.as_rule() {
                 Rule::neg => UnaryOp::Neg,
+                Rule::not => UnaryOp::Not,
                 _ => unreachable!(),
             };
             let node = Node::UnaryOp(op, rhs.noderef());

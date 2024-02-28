@@ -1,17 +1,28 @@
-program      =   { SOI ~ expr ~ EOI }
-  expr       =   { prefix? ~ primary ~ (infix ~ prefix? ~ primary )* }
-    infix    =  _{ add | sub | mul | div | eqeq | neq }
-      add    =   { "+" } // Addition
-      sub    =   { "-" } // Subtraction
-      mul    =   { "*" } // Multiplication
-      div    =   { "/" } // Division
-      eqeq   =   { "==" }
-      neq   =    { "!=" }
-    prefix   =  _{ neg }
-      neg    =   { "-" } // Negation
-    primary  =  _{ number | bool | nil | "(" ~ expr ~ ")" }
-      number =  @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT+)? }
-      bool   =   { "true" | "false" }
-      nil    =   { "nil" }
+program = { SOI ~ expr ~ EOI }
 
-WHITESPACE   =  _{ " " | "\t" | NEWLINE }
+expr = { prefix? ~ primary ~ (infix ~ prefix? ~ primary)* }
+
+infix = _{ add | sub | mul | div | eqeq | neq }
+add   =  { "+" }
+sub   =  { "-" }
+mul   =  { "*" }
+div   =  { "/" }
+eqeq  =  { "==" }
+neq   =  { "!=" }
+
+prefix = _{ neg | not }
+neg    =  { "-" }
+not    =  { "!" }
+
+primary = _{ number | bool | nil | "(" ~ expr ~ ")" | string }
+number  = @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT+)? }
+bool    =  { "true" | "false" }
+nil     =  { "nil" }
+string  = ${ "\"" ~ inner ~ "\"" }
+inner   = @{ char* }
+char    =  {
+    !("\"" | "\\") ~ ANY
+  | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+}
+
+WHITESPACE = _{ " " | "\t" | NEWLINE }
