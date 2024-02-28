@@ -31,7 +31,9 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
                 Rule::number => Node::Number(primary.as_str().parse().unwrap()),
                 Rule::bool => Node::Bool(primary.as_str().parse().unwrap()),
                 Rule::nil => Node::Nil,
-                Rule::string => Node::String(primary.as_str().parse().unwrap()),
+                Rule::string => {
+                    Node::String(primary.into_inner().next().unwrap().as_str().to_string())
+                }
                 r => unreachable!("primary rule {:?}", r),
             };
             AST {

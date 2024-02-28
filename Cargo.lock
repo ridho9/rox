@@ -150,6 +150,7 @@ dependencies = [
  "lazy_static",
  "pest",
  "pest_derive",
+ "thiserror",
 ]
 
 [[package]]
