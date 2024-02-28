@@ -138,6 +138,14 @@ impl AST {
             line += 1;
         }
     }
+
+    pub fn tailref(&self) -> NodeRef {
+        NodeRef(self.list.0.len() - 1)
+    }
+
+    pub fn at(&self, curref: NodeRef) -> &Node {
+        self.list.0.get(curref.0).expect("invalid ref")
+    }
 }
 
 #[derive(Debug)]
