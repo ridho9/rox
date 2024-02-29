@@ -2,13 +2,17 @@ program = { SOI ~ expr ~ EOI }
 
 expr = { prefix? ~ primary ~ (infix ~ prefix? ~ primary)* }
 
-infix = _{ add | sub | mul | div | eqeq | neq }
+infix = _{ add | sub | mul | div | eqeq | neq | le | lt | ge | gt }
 add   =  { "+" }
 sub   =  { "-" }
 mul   =  { "*" }
 div   =  { "/" }
 eqeq  =  { "==" }
 neq   =  { "!=" }
+le    =  { "<=" }
+lt    =  { "<" }
+ge    =  { ">=" }
+gt    =  { ">" }
 
 prefix = _{ neg | not }
 neg    =  { "-" }

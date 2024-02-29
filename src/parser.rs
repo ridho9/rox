@@ -14,6 +14,10 @@ lazy_static! {
 
         PrattParser::new()
             .op(Op::infix(Rule::eqeq, Left) | Op::infix(Rule::neq, Left))
+            .op(Op::infix(Rule::le, Left)
+                | Op::infix(Rule::lt, Left)
+                | Op::infix(Rule::ge, Left)
+                | Op::infix(Rule::gt, Left))
             .op(Op::infix(Rule::add, Left) | Op::infix(Rule::sub, Left))
             .op(Op::infix(Rule::mul, Left) | Op::infix(Rule::div, Left))
             .op(Op::prefix(Rule::neg) | Op::prefix(Rule::not))
@@ -73,6 +77,10 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
                 Rule::div => BinaryOp::Div,
                 Rule::eqeq => BinaryOp::EqEq,
                 Rule::neq => BinaryOp::Neq,
+                Rule::le => BinaryOp::LessEq,
+                Rule::lt => BinaryOp::Less,
+                Rule::ge => BinaryOp::GreaterEq,
+                Rule::gt => BinaryOp::Greater,
                 _ => unreachable!(),
             };
             let lhs_ref = lhs.noderef();

@@ -50,6 +50,10 @@ pub enum BinaryOp {
     Div,
     EqEq,
     Neq,
+    LessEq,
+    Less,
+    GreaterEq,
+    Greater,
 }
 
 #[derive(Debug, Clone, Copy)]

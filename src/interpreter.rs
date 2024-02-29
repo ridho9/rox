@@ -1,5 +1,5 @@
 use std::{
-    fmt::{format, Display},
+    fmt::Display,
     ops::{Add, Div, Mul, Neg, Not, Sub},
     string::String,
 };
@@ -40,8 +40,53 @@ impl Interpreter {
                     BinaryOp::Sub => (lhs - rhs)?,
                     BinaryOp::Mul => (lhs * rhs)?,
                     BinaryOp::Div => (lhs / rhs)?,
-                    BinaryOp::EqEq => todo!(),
-                    BinaryOp::Neq => todo!(),
+                    BinaryOp::EqEq => Value::Bool(lhs == rhs),
+                    BinaryOp::Neq => Value::Bool(lhs != rhs),
+                    BinaryOp::Less => match (lhs, rhs) {
+                        (Value::Number(lhs), Value::Number(rhs)) => Value::Bool(lhs < rhs),
+                        (lhs, rhs) => {
+                            return Err(RuntimeError {
+                                kind: RuntimeErrorKind::TypeError {
+                                    op: "<",
+                                    types: vec![lhs.type_name(), rhs.type_name()],
+                                },
+                            })
+                        }
+                    },
+                    BinaryOp::LessEq => match (lhs, rhs) {
+                        (Value::Number(lhs), Value::Number(rhs)) => Value::Bool(lhs <= rhs),
+                        (lhs, rhs) => {
+                            return Err(RuntimeError {
+                                kind: RuntimeErrorKind::TypeError {
+                                    op: "<=",
+                                    types: vec![lhs.type_name(), rhs.type_name()],
+                                },
+                            })
+                        }
+                    },
+                    BinaryOp::Greater => match (lhs, rhs) {
+                        (Value::Number(lhs), Value::Number(rhs)) => Value::Bool(lhs > rhs),
+                        (lhs, rhs) => {
+                            return Err(RuntimeError {
+                                kind: RuntimeErrorKind::TypeError {
+                                    op: ">",
+                                    types: vec![lhs.type_name(), rhs.type_name()],
+                                },
+                            })
+                        }
+                    },
+                    BinaryOp::GreaterEq => match (lhs, rhs) {
+                        (Value::Number(lhs), Value::Number(rhs)) => Value::Bool(lhs >= rhs),
+                        (lhs, rhs) => {
+                            return Err(RuntimeError {
+                                kind: RuntimeErrorKind::TypeError {
+                                    op: ">=",
+                                    types: vec![lhs.type_name(), rhs.type_name()],
+                                },
+                            })
+                        }
+                    },
+                    _ => unimplemented!(),
                 }
             }
             _ => unimplemented!("{:?}", node),
@@ -50,7 +95,7 @@ impl Interpreter {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Value {
     Nil,
     Bool(bool),
@@ -67,6 +112,14 @@ impl Value {
             Value::String(_) => "string",
         }
     }
+
+    pub fn is_truthy(&self) -> bool {
+        match self {
+            Value::Nil => false,
+            Value::Bool(b) => *b,
+            _ => true,
+        }
+    }
 }
 
 impl Add for Value {
@@ -75,6 +128,7 @@ impl Add for Value {
     fn add(self, rhs: Self) -> Self::Output {
         let res = match (self, rhs) {
             (Value::Number(lhs), Value::Number(rhs)) => Value::Number(lhs + rhs),
+            (Value::String(lhs), Value::String(rhs)) => Value::String(lhs + &rhs),
             (lhs, rhs) => {
                 return Err(RuntimeError {
                     kind: RuntimeErrorKind::TypeError {
@@ -156,19 +210,7 @@ impl Not for Value {
     type Output = Result<Self, RuntimeError>;
 
     fn not(self) -> Self::Output {
-        let value = match self {
-            Value::Nil => Value::Bool(true),
-            Value::Bool(b) => Value::Bool(!b),
-            _ => {
-                return Err(RuntimeError {
-                    kind: RuntimeErrorKind::TypeError {
-                        op: "!",
-                        types: vec![self.type_name()],
-                    },
-                })
-            }
-        };
-        Ok(value)
+        Ok(Value::Bool(!self.is_truthy()))
     }
 }
 
