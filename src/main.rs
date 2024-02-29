@@ -7,34 +7,26 @@ use std::io::{self, BufRead};
 use parser::{RoxParser, Rule};
 use pest::Parser;
 
-use crate::{interpreter::Interpreter, parser::parse_expr};
+use crate::{interpreter::Interpreter, parser::parse_program};
 
 fn main() -> io::Result<()> {
     for line in io::stdin().lock().lines() {
         match RoxParser::parse(Rule::program, &line?) {
-            Ok(mut pairs) => {
-                // println!("{:#?}", pairs);
-                let ast = parse_expr(
-                    pairs
-                        .next() // program
-                        .unwrap()
-                        .into_inner()
-                        .next() // expr
-                        .unwrap()
-                        .into_inner(),
-                );
-                ast.print();
+            Ok(mut program) => {
+                let ast = parse_program(program.next().unwrap().into_inner());
+
+                #[cfg(debug)]
+                ast.print_debug();
 
                 let mut intp = Interpreter::new();
-                println!("=====>");
                 let result = intp.interpret_ast(&ast);
                 match result {
-                    Ok(result) => println!("{:?}", result),
-                    Err(re) => println!("{}", re),
+                    Ok(_) => (),
+                    Err(re) => eprintln!("{}", re),
                 }
             }
             Err(e) => {
-                eprintln!("Parse failed: {}", e);
+                eprintln!("parse failed: {}", e);
             }
         }
     }

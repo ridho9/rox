@@ -89,7 +89,12 @@ impl Interpreter {
                     _ => unimplemented!(),
                 }
             }
-            _ => unimplemented!("{:?}", node),
+            Node::PrintStmt(expr) => {
+                let result = self.eval_ast_ref(ast, *expr)?;
+                println!("{}", result);
+                Value::Nil
+            }
+            _ => unimplemented!("cant handle node {:?}", node),
         };
         Ok(result)
     }

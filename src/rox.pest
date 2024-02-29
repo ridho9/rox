@@ -1,4 +1,7 @@
-program = { SOI ~ expr ~ EOI }
+program = { SOI ~ statement ~ EOI }
+
+statement       = { print_statement }
+print_statement = { "print" ~ expr ~ ";" }
 
 expr = { prefix? ~ primary ~ (infix ~ prefix? ~ primary)* }
 

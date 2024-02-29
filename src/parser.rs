@@ -1,5 +1,8 @@
 use lazy_static::lazy_static;
-use pest::{iterators::Pairs, pratt_parser::PrattParser};
+use pest::{
+    iterators::{Pair, Pairs},
+    pratt_parser::PrattParser,
+};
 use pest_derive::Parser;
 
 use crate::ast::{BinaryOp, Metadata, Node, NodeList, UnaryOp, AST};
@@ -24,7 +27,28 @@ lazy_static! {
     };
 }
 
-pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
+pub fn parse_program(mut program: Pairs<Rule>) -> AST {
+    let mut statements = program.next().unwrap().into_inner();
+    let stmt = statements.next().unwrap();
+    parse_statement(stmt)
+}
+
+pub fn parse_statement(stmt: Pair<Rule>) -> AST {
+    match stmt.as_rule() {
+        Rule::print_statement => {
+            let meta = Metadata {
+                linecol: stmt.as_span().start_pos().line_col(),
+            };
+            let mut expr = parse_expr(stmt.into_inner());
+            let expr_ref = expr.noderef();
+            expr.push_node(Node::PrintStmt(expr_ref), meta);
+            expr
+        }
+        _ => unreachable!(),
+    }
+}
+
+pub fn parse_expr(exprs: Pairs<Rule>) -> AST {
     PRATT_PARSER
         .map_primary(|primary| {
             let meta = Metadata {
@@ -86,7 +110,7 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
             let lhs_ref = lhs.noderef();
             let rhs_ref = lhs.append(rhs);
             let node = Node::BinaryOp(op, lhs_ref, rhs_ref);
-            lhs.push(node, meta);
+            lhs.push_node(node, meta);
             lhs
         })
         .map_prefix(|op, mut rhs| {
@@ -99,8 +123,8 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> AST {
                 _ => unreachable!(),
             };
             let node = Node::UnaryOp(op, rhs.noderef());
-            rhs.push(node, meta);
+            rhs.push_node(node, meta);
             rhs
         })
-        .parse(pairs)
+        .parse(exprs)
 }
