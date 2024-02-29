@@ -26,8 +26,12 @@ fn main() -> io::Result<()> {
                 ast.print();
 
                 let mut intp = Interpreter::new();
-                let result = intp.exec_ast(&ast).unwrap();
-                println!("====>:\n{}", result);
+                println!("=====>");
+                let result = intp.interpret_ast(&ast);
+                match result {
+                    Ok(result) => println!("{:?}", result),
+                    Err(re) => println!("{}", re),
+                }
             }
             Err(e) => {
                 eprintln!("Parse failed: {}", e);
