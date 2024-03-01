@@ -11,20 +11,22 @@ pub enum Node {
     UnaryOp(UnaryOp, NodeRef),
 
     PrintStmt(NodeRef),
+    Statements(Vec<NodeRef>),
 }
 
 impl Debug for Node {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Nil => write!(f, "Lit nil"),
-            Self::Bool(arg0) => write!(f, "Lit {}", arg0),
-            Self::Number(arg0) => write!(f, "Lit {}", arg0),
-            Self::String(arg0) => write!(f, "Lit {:?}", arg0),
-            Self::BinaryOp(arg0, arg1, arg2) => {
+            Node::Nil => write!(f, "Lit nil"),
+            Node::Bool(arg0) => write!(f, "Lit {}", arg0),
+            Node::Number(arg0) => write!(f, "Lit {}", arg0),
+            Node::String(arg0) => write!(f, "Lit {:?}", arg0),
+            Node::BinaryOp(arg0, arg1, arg2) => {
                 write!(f, "Binary {:?} {:?} {:?}", arg0, arg1, arg2)
             }
-            Self::UnaryOp(arg0, arg1) => write!(f, "Unary {:?} {:?}", arg0, arg1),
-            Self::PrintStmt(arg0) => write!(f, "Print {:?}", arg0),
+            Node::UnaryOp(arg0, arg1) => write!(f, "Unary {:?} {:?}", arg0, arg1),
+            Node::PrintStmt(arg0) => write!(f, "Print {:?}", arg0),
+            Node::Statements(refs) => write!(f, "Statements {:?}", refs),
         }
     }
 }
@@ -41,7 +43,8 @@ impl Add<usize> for Node {
             BinaryOp(op, lhs, rhs) => BinaryOp(op, lhs + t, rhs + t),
             UnaryOp(op, i) => UnaryOp(op, i + t),
             String(s) => String(s),
-            PrintStmt(expr) => PrintStmt(expr),
+            PrintStmt(rhs) => PrintStmt(rhs + t),
+            Statements(refs) => Statements(refs.into_iter().map(|r| r + t).collect()),
         }
     }
 }
@@ -136,14 +139,17 @@ impl AST {
     }
 
     pub fn print_debug(&self) {
-        let mut line = 0;
-        for (node, meta) in self.list.0.iter().zip(self.meta.iter()) {
-            print!("[{:4}:{:4}] ", meta.linecol.0, meta.linecol.1);
-            print!("{:8} ", line);
-            print!("{:?}", node);
-            println!("");
+        #[cfg(feature = "debug")]
+        {
+            let mut line = 0;
+            for (node, meta) in self.list.0.iter().zip(self.meta.iter()) {
+                print!("[{:4}:{:4}] ", meta.linecol.0, meta.linecol.1);
+                print!("{:8} ", line);
+                print!("{:?}", node);
+                println!("");
 
-            line += 1;
+                line += 1;
+            }
         }
     }
 
@@ -156,7 +162,7 @@ impl AST {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Metadata {
     pub linecol: (usize, usize),
 }

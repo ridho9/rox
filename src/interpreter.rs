@@ -86,15 +86,19 @@ impl Interpreter {
                             })
                         }
                     },
-                    _ => unimplemented!(),
                 }
             }
             Node::PrintStmt(expr) => {
                 let result = self.eval_ast_ref(ast, *expr)?;
                 println!("{}", result);
+                result
+            }
+            Node::Statements(refs) => {
+                for stmt_ref in refs {
+                    self.eval_ast_ref(ast, *stmt_ref)?;
+                }
                 Value::Nil
             }
-            _ => unimplemented!("cant handle node {:?}", node),
         };
         Ok(result)
     }

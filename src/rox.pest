@@ -1,5 +1,6 @@
-program = { SOI ~ statement ~ EOI }
+program = { SOI ~ statements ~ EOI }
 
+statements      = { statement* }
 statement       = { print_statement }
 print_statement = { "print" ~ expr ~ ";" }
 

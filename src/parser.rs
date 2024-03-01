@@ -1,8 +1,5 @@
 use lazy_static::lazy_static;
-use pest::{
-    iterators::{Pair, Pairs},
-    pratt_parser::PrattParser,
-};
+use pest::{iterators::Pairs, pratt_parser::PrattParser};
 use pest_derive::Parser;
 
 use crate::ast::{BinaryOp, Metadata, Node, NodeList, UnaryOp, AST};
@@ -29,11 +26,28 @@ lazy_static! {
 
 pub fn parse_program(mut program: Pairs<Rule>) -> AST {
     let mut statements = program.next().unwrap().into_inner();
-    let stmt = statements.next().unwrap();
-    parse_statement(stmt)
+    parse_statements(statements.next().unwrap().into_inner())
 }
 
-pub fn parse_statement(stmt: Pair<Rule>) -> AST {
+pub fn parse_statements(stmts: Pairs<Rule>) -> AST {
+    let mut result_ast = AST {
+        list: NodeList(vec![]),
+        meta: vec![],
+    };
+    let mut refs = vec![];
+
+    for stmt in stmts {
+        let stmt_ast = parse_statement(stmt.into_inner());
+        result_ast.append(stmt_ast);
+        refs.push(result_ast.noderef());
+    }
+    let meta = result_ast.meta[refs[0].0];
+    result_ast.push_node(Node::Statements(refs), meta);
+    result_ast
+}
+
+pub fn parse_statement(mut stmt: Pairs<Rule>) -> AST {
+    let stmt = stmt.next().unwrap();
     match stmt.as_rule() {
         Rule::print_statement => {
             let meta = Metadata {
