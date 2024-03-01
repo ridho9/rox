@@ -72,6 +72,7 @@ pub fn parse_expr(exprs: Pairs<Rule>) -> AST {
                 Rule::expr => return parse_expr(primary.into_inner()),
                 Rule::number => Node::Number(primary.as_str().parse().unwrap()),
                 Rule::bool => Node::Bool(primary.as_str().parse().unwrap()),
+                Rule::ident => Node::Ident(primary.as_str().to_string()),
                 Rule::nil => Node::Nil,
                 Rule::string => Node::String({
                     let mut result = String::new();

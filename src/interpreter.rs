@@ -5,13 +5,20 @@ use std::{
 };
 use thiserror::Error;
 
-use crate::ast::{BinaryOp, Node, NodeRef, UnaryOp, AST};
+use crate::{
+    ast::{BinaryOp, Node, NodeRef, UnaryOp, AST},
+    env::Environment,
+};
 
-pub struct Interpreter {}
+pub struct Interpreter {
+    pub env: Environment,
+}
 
 impl Interpreter {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            env: Environment::new(),
+        }
     }
 
     pub fn interpret_ast(&mut self, ast: &AST) -> Result<Value, RuntimeError> {
@@ -25,6 +32,17 @@ impl Interpreter {
             Node::Bool(b) => Value::Bool(*b),
             Node::Number(n) => Value::Number(*n),
             Node::String(s) => Value::String(s.to_string()),
+            Node::Ident(name) => match self.env.get(name) {
+                Some(value) => value,
+                None => {
+                    return Err(RuntimeError {
+                        kind: RuntimeErrorKind::TypeError {
+                            op: "ident",
+                            types: vec![],
+                        },
+                    })
+                }
+            },
             Node::UnaryOp(op, rhs) => {
                 let rhs_res = self.eval_ast_ref(ast, *rhs)?;
                 match op {
@@ -104,7 +122,7 @@ impl Interpreter {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Value {
     Nil,
     Bool(bool),

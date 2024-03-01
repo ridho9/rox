@@ -2,6 +2,7 @@ program = { SOI ~ statements ~ EOI }
 
 statements      = { statement* }
 statement       = { print_statement }
+let_statement   = { "let" ~ ident ~ ("=" ~ expr)? ~ ";" }
 print_statement = { "print" ~ expr ~ ";" }
 
 expr = { prefix? ~ primary ~ (infix ~ prefix? ~ primary)* }
@@ -22,7 +23,7 @@ prefix = _{ neg | not }
 neg    =  { "-" }
 not    =  { "!" }
 
-primary    = _{ number | bool | nil | "(" ~ expr ~ ")" | string }
+primary    = _{ number | bool | nil | "(" ~ expr ~ ")" | string | ident }
 number     = @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) ~ ("." ~ ASCII_DIGIT+)? }
 bool       =  { "true" | "false" }
 nil        =  { "nil" }
@@ -33,5 +34,6 @@ char_noesc =  { !("\"" | "\\") ~ ANY }
 char_esc   =  {
     "\\" ~ ("\"" | "\\" | "/" | "n" | "r" | "t")
 }
+ident      =  { (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
 
 WHITESPACE = _{ " " | "\t" | NEWLINE }

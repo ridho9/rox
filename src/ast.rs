@@ -7,6 +7,7 @@ pub enum Node {
     Bool(bool),
     Number(f64),
     String(String),
+    Ident(String),
     BinaryOp(BinaryOp, NodeRef, NodeRef),
     UnaryOp(UnaryOp, NodeRef),
 
@@ -21,6 +22,7 @@ impl Debug for Node {
             Node::Bool(arg0) => write!(f, "Lit {}", arg0),
             Node::Number(arg0) => write!(f, "Lit {}", arg0),
             Node::String(arg0) => write!(f, "Lit {:?}", arg0),
+            Node::Ident(arg0) => write!(f, "Ident {}", arg0),
             Node::BinaryOp(arg0, arg1, arg2) => {
                 write!(f, "Binary {:?} {:?} {:?}", arg0, arg1, arg2)
             }
@@ -43,6 +45,7 @@ impl Add<usize> for Node {
             BinaryOp(op, lhs, rhs) => BinaryOp(op, lhs + t, rhs + t),
             UnaryOp(op, i) => UnaryOp(op, i + t),
             String(s) => String(s),
+            Ident(s) => Ident(s),
             PrintStmt(rhs) => PrintStmt(rhs + t),
             Statements(refs) => Statements(refs.into_iter().map(|r| r + t).collect()),
         }

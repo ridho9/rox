@@ -1,4 +1,5 @@
 pub mod ast;
+pub mod env;
 pub mod interpreter;
 pub mod parser;
 
@@ -64,7 +65,6 @@ fn run_repl(intp: &mut Interpreter) -> Result<()> {
             }
         };
 
-        // println!("program {:?}", program);
         let ast = parse_program(program);
         ast.print_debug();
 
