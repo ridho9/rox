@@ -9,6 +9,7 @@ debug = []
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+atty = "0.2.14"
 color-eyre = "0.6.2"
 lazy_static = "1.4.0"
 pest = "2.7.7"

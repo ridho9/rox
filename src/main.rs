@@ -3,7 +3,7 @@ pub mod env;
 pub mod interpreter;
 pub mod parser;
 
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead, Read, Write};
 
 use color_eyre::eyre::Result;
 use parser::{RoxParser, Rule};
@@ -24,13 +24,23 @@ fn main() -> Result<()> {
     if args.len() == 2 {
         run_file(&mut intp, &args[1])
     } else {
-        run_repl(&mut intp)
+        if atty::is(atty::Stream::Stdin) {
+            run_repl(&mut intp)
+        } else {
+            let mut program = String::new();
+            io::stdin().read_to_string(&mut program)?;
+            run_file_content(&mut intp, "stdin", &program)
+        }
     }
 }
 
 fn run_file(intp: &mut Interpreter, filename: &str) -> Result<()> {
     let program = std::fs::read_to_string(filename)?;
-    let program = RoxParser::parse(Rule::program, &program)?;
+    run_file_content(intp, filename, &program)
+}
+
+fn run_file_content(intp: &mut Interpreter, _filename: &str, content: &str) -> Result<()> {
+    let program = RoxParser::parse(Rule::program, &content)?;
 
     let ast = parse_program(program);
     ast.print_debug();
