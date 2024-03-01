@@ -193,7 +193,7 @@ impl Mul for Value {
 
     fn mul(self, rhs: Self) -> Self::Output {
         let res = match (self, rhs) {
-            (Value::Number(lhs), Value::Number(rhs)) => Value::Number(lhs - rhs),
+            (Value::Number(lhs), Value::Number(rhs)) => Value::Number(lhs * rhs),
             (lhs, rhs) => {
                 return Err(RuntimeError {
                     kind: RuntimeErrorKind::TypeError {
