@@ -1,0 +1,24 @@
+===
+Basic expr
+===
+
+true
+false
+nil
+1
+1.2
+_a
+_b
+abcd
+
+---
+
+(program
+  (bool)
+  (bool)
+  (nil)
+  (number)
+  (number)
+  (ident)
+  (ident)
+  (ident))

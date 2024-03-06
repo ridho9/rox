@@ -3,6 +3,11 @@ module.exports = grammar({
 
   rules: {
     // TODO: add the actual grammar rules
-    source_file: ($) => "hello",
+    program: ($) => repeat($._primary),
+    _primary: ($) => choice($.bool, $.nil, $.number, $.ident),
+    bool: ($) => choice("true", "false"),
+    nil: ($) => "nil",
+    number: ($) => /\d+(.\d+)?/,
+    ident: ($) => /[_a-zA-Z]\w*/,
   },
 });

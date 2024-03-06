@@ -1,9 +1,58 @@
 {
   "name": "rox",
   "rules": {
-    "source_file": {
+    "program": {
+      "type": "REPEAT",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_primary"
+      }
+    },
+    "_primary": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "bool"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "nil"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "number"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ident"
+        }
+      ]
+    },
+    "bool": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "true"
+        },
+        {
+          "type": "STRING",
+          "value": "false"
+        }
+      ]
+    },
+    "nil": {
       "type": "STRING",
-      "value": "hello"
+      "value": "nil"
+    },
+    "number": {
+      "type": "PATTERN",
+      "value": "\\d+(.\\d+)?"
+    },
+    "ident": {
+      "type": "PATTERN",
+      "value": "[_a-zA-Z]\\w*"
     }
   },
   "extras": [

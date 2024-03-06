@@ -9,5 +9,5 @@ fn main() {
     let source = "hello";
     let tree = parser.parse(source, None).expect("error parsing");
 
-    println!("{:?}", tree.root_node().to_sexp())
+    println!("{:?}", tree.root_node())
 }
