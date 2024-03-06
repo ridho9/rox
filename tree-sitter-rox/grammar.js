@@ -10,6 +10,7 @@ module.exports = grammar({
     print_stmt: ($) => seq("print", $.expr, ";"),
 
     expr: ($) => choice($._primary, $.unary_expr, $.binary_expr),
+
     unary_expr: ($) => prec(10, choice(seq("!", $.expr), seq("-", $.expr))),
     binary_expr: ($) =>
       choice(

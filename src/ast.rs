@@ -166,6 +166,13 @@ impl AST {
     pub fn at(&self, curref: NodeRef) -> &Node {
         self.list.0.get(curref.0).expect("invalid ref")
     }
+
+    pub fn new() -> AST {
+        AST {
+            list: NodeList(vec![]),
+            meta: vec![],
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
