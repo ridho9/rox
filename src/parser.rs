@@ -58,7 +58,26 @@ pub fn parse_statement(mut stmt: Pairs<Rule>) -> AST {
             expr.push_node(Node::PrintStmt(expr_ref), meta);
             expr
         }
-        _ => unreachable!(),
+        Rule::let_statement => {
+            let meta = Metadata {
+                linecol: stmt.as_span().start_pos().line_col(),
+            };
+            let mut stmt = stmt.into_inner();
+            let ident = stmt.next().unwrap().as_str().to_string();
+            let expr = stmt.next().map(|expr| parse_expr(expr.into_inner()));
+            let mut result_ast = AST {
+                list: NodeList(vec![]),
+                meta: vec![],
+            };
+            let expr_ref = expr.as_ref().map(|expr| {
+                let expr_ref = expr.noderef();
+                result_ast.append(expr.clone());
+                expr_ref
+            });
+            result_ast.push_node(Node::LetStmt(ident, expr_ref), meta);
+            result_ast
+        }
+        rule => unreachable!("rule {:?} {:?}", rule, stmt),
     }
 }
 

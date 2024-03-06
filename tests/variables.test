@@ -1,0 +1,7 @@
+# global variables
+<
+let name = "ridho";
+print name;
+$ cargo run -q
+>
+ridho

@@ -36,10 +36,7 @@ impl Interpreter {
                 Some(value) => value,
                 None => {
                     return Err(RuntimeError {
-                        kind: RuntimeErrorKind::TypeError {
-                            op: "ident",
-                            types: vec![],
-                        },
+                        kind: RuntimeErrorKind::NameError(name.to_string()),
                     })
                 }
             },
@@ -116,6 +113,14 @@ impl Interpreter {
                     self.eval_ast_ref(ast, *stmt_ref)?;
                 }
                 Value::Nil
+            }
+            Node::LetStmt(ident, expr) => {
+                let val = match expr {
+                    Some(val) => self.eval_ast_ref(ast, *val)?,
+                    None => Value::Nil,
+                };
+                self.env.define(ident.to_string(), val.clone());
+                val
             }
         };
         Ok(result)
@@ -286,4 +291,6 @@ pub enum RuntimeErrorKind {
     },
     #[error("division by zero")]
     DivisionByZeroError,
+    #[error("name error: variable '{0}' is not defined in the current scope")]
+    NameError(String),
 }

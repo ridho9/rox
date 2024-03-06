@@ -11,8 +11,9 @@ pub enum Node {
     BinaryOp(BinaryOp, NodeRef, NodeRef),
     UnaryOp(UnaryOp, NodeRef),
 
-    PrintStmt(NodeRef),
     Statements(Vec<NodeRef>),
+    LetStmt(String, Option<NodeRef>),
+    PrintStmt(NodeRef),
 }
 
 impl Debug for Node {
@@ -29,6 +30,7 @@ impl Debug for Node {
             Node::UnaryOp(arg0, arg1) => write!(f, "Unary {:?} {:?}", arg0, arg1),
             Node::PrintStmt(arg0) => write!(f, "Print {:?}", arg0),
             Node::Statements(refs) => write!(f, "Statements {:?}", refs),
+            Node::LetStmt(ident, expr) => write!(f, "Let {} {:?}", ident, expr),
         }
     }
 }
@@ -48,6 +50,7 @@ impl Add<usize> for Node {
             Ident(s) => Ident(s),
             PrintStmt(rhs) => PrintStmt(rhs + t),
             Statements(refs) => Statements(refs.into_iter().map(|r| r + t).collect()),
+            LetStmt(ident, expr) => LetStmt(ident, expr.map(|r| r + t)),
         }
     }
 }
@@ -94,7 +97,7 @@ impl Into<NodeRef> for usize {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NodeList(pub Vec<Node>);
 
 impl NodeList {
@@ -120,7 +123,7 @@ impl NodeList {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AST {
     pub list: NodeList,
     pub meta: Vec<Metadata>,
