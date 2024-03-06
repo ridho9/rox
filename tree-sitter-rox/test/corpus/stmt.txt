@@ -1,0 +1,21 @@
+===
+Basic statement
+===
+print 1;
+let a;
+let b = 10;
+---
+
+(program
+  (stmt
+    (print_stmt
+      (expr
+        (number))))
+  (stmt
+    (let_stmt
+      (ident)))
+  (stmt
+    (let_stmt
+      (ident)
+      (expr
+        (number)))))

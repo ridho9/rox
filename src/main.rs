@@ -6,8 +6,8 @@ fn main() {
         .set_language(&tree_sitter_rox::language())
         .expect("error loading grammar");
 
-    let source = "hello";
+    let source = "1+2";
     let tree = parser.parse(source, None).expect("error parsing");
 
-    println!("{:?}", tree.root_node())
+    println!("{:?}", tree.root_node().to_sexp())
 }
