@@ -7,8 +7,7 @@ use std::io::{self, BufRead, Read, Write};
 
 use color_eyre::eyre::Result;
 use interpreter::Interpreter;
-use parser_pest::{parse_program, RoxParser, Rule};
-use pest::Parser;
+use parser_pest::parse;
 
 fn main() -> Result<()> {
     let mut intp = Interpreter::new();
@@ -38,10 +37,15 @@ fn run_file(intp: &mut Interpreter, filename: &str) -> Result<()> {
     run_file_content(intp, filename, &program)
 }
 
-fn run_file_content(intp: &mut Interpreter, _filename: &str, content: &str) -> Result<()> {
-    let program = RoxParser::parse(Rule::program, &content)?;
-
-    let ast = parse_program(program);
+fn run_file_content(intp: &mut Interpreter, filename: &str, source: &str) -> Result<()> {
+    let ast = match parse(&filename, &source) {
+        Ok(ast) => ast,
+        Err(e) => {
+            let e = e.with_path(&filename);
+            eprintln!("parse error: {}", e);
+            return Err(e.into());
+        }
+    };
     ast.print_debug();
 
     let result = intp.interpret_ast(&ast);
@@ -61,20 +65,19 @@ fn run_repl(intp: &mut Interpreter) -> Result<()> {
         print!("repl[{}]> ", linecount);
         io::stdout().flush()?;
 
-        let line = match lines.next() {
+        let source = match lines.next() {
             Some(line) => line?,
             None => break,
         };
 
-        let program = match RoxParser::parse(Rule::program, &line) {
-            Ok(program) => program,
+        let ast = match parse(&fname, &source) {
+            Ok(ast) => ast,
             Err(e) => {
                 eprintln!("parse error: {}", e.with_path(&fname));
                 continue;
             }
         };
 
-        let ast = parse_program(program);
         ast.print_debug();
 
         let result = intp.interpret_ast(&ast);

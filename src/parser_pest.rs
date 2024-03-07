@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use pest::{iterators::Pairs, pratt_parser::PrattParser};
+use pest::{error::Error, iterators::Pairs, pratt_parser::PrattParser, Parser};
 use pest_derive::Parser;
 
 use crate::ast::{BinaryOp, Metadata, Node, NodeList, UnaryOp, AST};
@@ -24,12 +24,17 @@ lazy_static! {
     };
 }
 
-pub fn parse_program(mut program: Pairs<Rule>) -> AST {
+pub fn parse(_filename: &str, source: &str) -> Result<AST, Error<Rule>> {
+    let program = RoxParser::parse(Rule::program, &source)?;
+    Ok(parse_program(program))
+}
+
+fn parse_program(mut program: Pairs<Rule>) -> AST {
     let mut statements = program.next().unwrap().into_inner();
     parse_statements(statements.next().unwrap().into_inner())
 }
 
-pub fn parse_statements(stmts: Pairs<Rule>) -> AST {
+fn parse_statements(stmts: Pairs<Rule>) -> AST {
     let mut result_ast = AST {
         list: NodeList(vec![]),
         meta: vec![],
@@ -46,7 +51,7 @@ pub fn parse_statements(stmts: Pairs<Rule>) -> AST {
     result_ast
 }
 
-pub fn parse_statement(mut stmt: Pairs<Rule>) -> AST {
+fn parse_statement(mut stmt: Pairs<Rule>) -> AST {
     let stmt = stmt.next().unwrap();
     match stmt.as_rule() {
         Rule::print_statement => {
@@ -81,7 +86,7 @@ pub fn parse_statement(mut stmt: Pairs<Rule>) -> AST {
     }
 }
 
-pub fn parse_expr(exprs: Pairs<Rule>) -> AST {
+fn parse_expr(exprs: Pairs<Rule>) -> AST {
     PRATT_PARSER
         .map_primary(|primary| {
             let meta = Metadata {
