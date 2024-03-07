@@ -1,5 +1,6 @@
+use color_eyre::eyre::Result;
 use lazy_static::lazy_static;
-use pest::{error::Error, iterators::Pairs, pratt_parser::PrattParser, Parser};
+use pest::{iterators::Pairs, pratt_parser::PrattParser, Parser};
 use pest_derive::Parser;
 
 use crate::ast::{BinaryOp, Metadata, Node, NodeList, UnaryOp, AST};
@@ -24,7 +25,7 @@ lazy_static! {
     };
 }
 
-pub fn parse(_filename: &str, source: &str) -> Result<AST, Error<Rule>> {
+pub fn parse(_filename: &str, source: &str) -> Result<AST> {
     let program = RoxParser::parse(Rule::program, &source)?;
     Ok(parse_program(program))
 }

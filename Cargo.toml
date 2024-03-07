@@ -10,6 +10,7 @@ debug = []
 
 [dependencies]
 atty = "0.2.14"
+chumsky = "0.9.3"
 color-eyre = "0.6.2"
 lazy_static = "1.4.0"
 pest = "2.7.7"

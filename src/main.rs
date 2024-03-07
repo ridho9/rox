@@ -3,9 +3,9 @@ pub mod env;
 pub mod interpreter;
 pub mod parser_pest;
 
+use color_eyre::eyre::Result;
 use std::io::{self, BufRead, Read, Write};
 
-use color_eyre::eyre::Result;
 use interpreter::Interpreter;
 use parser_pest::parse;
 
@@ -41,9 +41,8 @@ fn run_file_content(intp: &mut Interpreter, filename: &str, source: &str) -> Res
     let ast = match parse(&filename, &source) {
         Ok(ast) => ast,
         Err(e) => {
-            let e = e.with_path(&filename);
             eprintln!("parse error: {}", e);
-            return Err(e.into());
+            return Err(e);
         }
     };
     ast.print_debug();
@@ -61,7 +60,7 @@ fn run_repl(intp: &mut Interpreter) -> Result<()> {
     let mut lines = io::stdin().lock().lines();
     loop {
         linecount += 1;
-        let fname = format!("repl[{}]", linecount);
+        let filename = format!("repl[{}]", linecount);
         print!("repl[{}]> ", linecount);
         io::stdout().flush()?;
 
@@ -70,10 +69,10 @@ fn run_repl(intp: &mut Interpreter) -> Result<()> {
             None => break,
         };
 
-        let ast = match parse(&fname, &source) {
+        let ast = match parse(&filename, &source) {
             Ok(ast) => ast,
             Err(e) => {
-                eprintln!("parse error: {}", e.with_path(&fname));
+                eprintln!("parse error: {}", e);
                 continue;
             }
         };
