@@ -1,59 +1,87 @@
 pub mod ast;
+pub mod env;
+pub mod interpreter;
+pub mod parser_pest;
 
-use crate::ast::{Metadata, Node, NodeList, AST};
-use tree_sitter::{Node as TSNode, Parser};
+use std::io::{self, BufRead, Read, Write};
 
-fn main() {
-    let mut parser = Parser::new();
-    parser
-        .set_language(&tree_sitter_rox::language())
-        .expect("error loading grammar");
+use color_eyre::eyre::Result;
+use interpreter::Interpreter;
+use parser_pest::{parse_program, RoxParser, Rule};
+use pest::Parser;
 
-    let source = "print 5;";
-    let tree = parser.parse(source, None).expect("error parsing");
-    let program = tree.root_node();
+fn main() -> Result<()> {
+    let mut intp = Interpreter::new();
 
-    let ast = parse_program(&program, source);
-}
+    let args: Vec<String> = std::env::args().collect();
 
-fn parse_program(node: &TSNode, source: &str) -> AST {
-    let mut cursor = node.walk();
-    for child in node.children(&mut cursor) {
-        parse_stmt(&child, source);
+    if args.len() > 2 {
+        eprintln!("Usage: rox [script]");
+        std::process::exit(64);
     }
-    todo!()
-}
 
-fn parse_stmt(node: &TSNode, source: &str) -> AST {
-    let stmt = node.child(0).unwrap();
-    println!("{:?} {}", stmt, stmt.to_sexp());
-
-    match stmt.kind() {
-        "print_stmt" => {
-            let expr = stmt.child(1).unwrap();
-            parse_expr(&expr, source)
+    if args.len() == 2 {
+        run_file(&mut intp, &args[1])
+    } else {
+        if atty::is(atty::Stream::Stdin) {
+            run_repl(&mut intp)
+        } else {
+            let mut program = String::new();
+            io::stdin().read_to_string(&mut program)?;
+            run_file_content(&mut intp, "stdin", &program)
         }
-        kind => unreachable!("unexpected stmt kind: {:?}", kind),
     }
 }
 
-fn parse_expr(node: &TSNode, source: &str) -> AST {
-    let expr = node.child(0).unwrap();
-    println!("{:?} {}", expr, expr.to_sexp());
-    let start_pos = expr.start_position();
-    let meta = Metadata {
-        linecol: (start_pos.row, start_pos.column),
-    };
+fn run_file(intp: &mut Interpreter, filename: &str) -> Result<()> {
+    let program = std::fs::read_to_string(filename)?;
+    run_file_content(intp, filename, &program)
+}
 
-    let anode = match expr.kind() {
-        "number" => {
-            let child: f64 = source[expr.start_byte()..expr.end_byte()].parse().unwrap();
-            Node::Number(child)
-        }
-        kind => unreachable!("unexpected expr kind: {:?}", kind),
-    };
-    AST {
-        list: NodeList(vec![anode]),
-        meta: vec![meta],
+fn run_file_content(intp: &mut Interpreter, _filename: &str, content: &str) -> Result<()> {
+    let program = RoxParser::parse(Rule::program, &content)?;
+
+    let ast = parse_program(program);
+    ast.print_debug();
+
+    let result = intp.interpret_ast(&ast);
+    match result {
+        Ok(_) => (),
+        Err(re) => eprintln!("{}", re),
     }
+    Ok(())
+}
+
+fn run_repl(intp: &mut Interpreter) -> Result<()> {
+    let mut linecount = 0;
+    let mut lines = io::stdin().lock().lines();
+    loop {
+        linecount += 1;
+        let fname = format!("repl[{}]", linecount);
+        print!("repl[{}]> ", linecount);
+        io::stdout().flush()?;
+
+        let line = match lines.next() {
+            Some(line) => line?,
+            None => break,
+        };
+
+        let program = match RoxParser::parse(Rule::program, &line) {
+            Ok(program) => program,
+            Err(e) => {
+                eprintln!("parse error: {}", e.with_path(&fname));
+                continue;
+            }
+        };
+
+        let ast = parse_program(program);
+        ast.print_debug();
+
+        let result = intp.interpret_ast(&ast);
+        match result {
+            Ok(_) => (),
+            Err(re) => eprintln!("{}", re),
+        }
+    }
+    Ok(())
 }

@@ -22,58 +22,72 @@ print !true;
   (stmt
     (print_stmt
       (expr
-        (bool))))
+        (primary
+          (bool)))))
   (stmt
     (print_stmt
       (expr
-        (bool))))
+        (primary
+          (bool)))))
   (stmt
     (print_stmt
       (expr
-        (nil))))
+        (primary
+          (nil)))))
   (stmt
     (print_stmt
       (expr
-        (number))))
-  (stmt
-    (print_stmt
-      (expr
-        (number))))
-  (stmt
-    (print_stmt
-      (expr
-        (ident))))
-  (stmt
-    (print_stmt
-      (expr
-        (ident))))
-  (stmt
-    (print_stmt
-      (expr
-        (ident))))
-  (stmt
-    (print_stmt
-      (expr
-        (string))))
-  (stmt
-    (print_stmt
-      (expr
-        (string))))
-  (stmt
-    (print_stmt
-      (expr
-        (string))))
-  (stmt
-    (print_stmt
-      (expr
-        (expr
+        (primary
           (number)))))
+  (stmt
+    (print_stmt
+      (expr
+        (primary
+          (number)))))
+  (stmt
+    (print_stmt
+      (expr
+        (primary
+          (ident)))))
+  (stmt
+    (print_stmt
+      (expr
+        (primary
+          (ident)))))
+  (stmt
+    (print_stmt
+      (expr
+        (primary
+          (ident)))))
+  (stmt
+    (print_stmt
+      (expr
+        (primary
+          (string)))))
+  (stmt
+    (print_stmt
+      (expr
+        (primary
+          (string)))))
+  (stmt
+    (print_stmt
+      (expr
+        (primary
+          (string)))))
+  (stmt
+    (print_stmt
+      (expr
+        (primary
+          (expr
+            (primary
+              (number)))))))
   (stmt
     (print_stmt
       (expr
         (unary_expr
           (expr
-            (bool)))))))
+            (primary
+              (bool))))))))
 
 ====
 Expr Precedence
@@ -95,27 +109,33 @@ print 1+2==3*4;
       (expr
         (unary_expr
           (expr
-            (number))))))
+            (primary
+              (number)))))))
   (stmt
     (print_stmt
       (expr
         (binary_expr
           (expr
-            (number))
+            (primary
+              (number)))
           (expr
-            (number))))))
+            (primary
+              (number)))))))
   (stmt
     (print_stmt
       (expr
         (binary_expr
           (expr
-            (number))
+            (primary
+              (number)))
           (expr
             (binary_expr
               (expr
-                (number))
+                (primary
+                  (number)))
               (expr
-                (number))))))))
+                (primary
+                  (number)))))))))
   (stmt
     (print_stmt
       (expr
@@ -123,21 +143,26 @@ print 1+2==3*4;
           (expr
             (binary_expr
               (expr
-                (number))
+                (primary
+                  (number)))
               (expr
-                (number))))
+                (primary
+                  (number)))))
           (expr
-            (number))))))
+            (primary
+              (number)))))))
   (stmt
     (print_stmt
       (expr
         (binary_expr
           (expr
-            (number))
+            (primary
+              (number)))
           (expr
             (unary_expr
               (expr
-                (number))))))))
+                (primary
+                  (number)))))))))
   (stmt
     (print_stmt
       (expr
@@ -147,17 +172,22 @@ print 1+2==3*4;
               (expr
                 (binary_expr
                   (expr
-                    (number))
+                    (primary
+                      (number)))
                   (expr
-                    (number))))
+                    (primary
+                      (number)))))
               (expr
                 (binary_expr
                   (expr
-                    (number))
+                    (primary
+                      (number)))
                   (expr
-                    (number))))))
+                    (primary
+                      (number)))))))
           (expr
-            (number))))))
+            (primary
+              (number)))))))
   (stmt
     (print_stmt
       (expr
@@ -165,12 +195,16 @@ print 1+2==3*4;
           (expr
             (binary_expr
               (expr
-                (number))
+                (primary
+                  (number)))
               (expr
-                (number))))
+                (primary
+                  (number)))))
           (expr
             (binary_expr
               (expr
-                (number))
+                (primary
+                  (number)))
               (expr
-                (number)))))))))
+                (primary
+                  (number))))))))))

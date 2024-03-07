@@ -82,7 +82,7 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_primary"
+          "name": "primary"
         },
         {
           "type": "SYMBOL",
@@ -262,7 +262,7 @@
         }
       ]
     },
-    "_primary": {
+    "primary": {
       "type": "CHOICE",
       "members": [
         {

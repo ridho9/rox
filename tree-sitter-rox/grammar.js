@@ -9,7 +9,7 @@ module.exports = grammar({
     let_stmt: ($) => seq("let", $.ident, optional(seq("=", $.expr)), ";"),
     print_stmt: ($) => seq("print", $.expr, ";"),
 
-    expr: ($) => choice($._primary, $.unary_expr, $.binary_expr),
+    expr: ($) => choice($.primary, $.unary_expr, $.binary_expr),
 
     unary_expr: ($) => prec(10, choice(seq("!", $.expr), seq("-", $.expr))),
     binary_expr: ($) =>
@@ -20,7 +20,7 @@ module.exports = grammar({
         prec.left(6, seq($.expr, choice("==", "!="), $.expr))
       ),
 
-    _primary: ($) =>
+    primary: ($) =>
       choice($.bool, $.nil, $.number, $.ident, $.string, $._group),
     bool: ($) => choice("true", "false"),
     nil: ($) => "nil",

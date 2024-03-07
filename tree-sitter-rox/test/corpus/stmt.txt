@@ -10,7 +10,8 @@ let b = 10;
   (stmt
     (print_stmt
       (expr
-        (number))))
+        (primary
+          (number)))))
   (stmt
     (let_stmt
       (ident)))
@@ -18,4 +19,5 @@ let b = 10;
     (let_stmt
       (ident)
       (expr
-        (number)))))
+        (primary
+          (number))))))
