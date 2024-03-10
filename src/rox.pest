@@ -1,5 +1,7 @@
 program = { SOI ~ statements ~ EOI }
 
+KEYWORD = { "let" | "print" | "true" | "false" | "nil" }
+
 statements      = { statement* }
 statement       = { print_statement | let_statement }
 let_statement   = { "let" ~ ident ~ ("=" ~ expr)? ~ ";" }
@@ -34,6 +36,6 @@ char_noesc =  { !("\"" | "\\") ~ ANY }
 char_esc   =  {
     "\\" ~ ("\"" | "\\" | "/" | "n" | "r" | "t")
 }
-ident      = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+ident      = @{ !(KEYWORD ~ !ASCII_ALPHA) ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
 
 WHITESPACE = _{ " " | "\t" | NEWLINE }

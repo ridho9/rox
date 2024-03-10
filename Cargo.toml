@@ -10,17 +10,11 @@ debug = []
 
 [dependencies]
 atty = "0.2.14"
-chumsky = "0.9.3"
 color-eyre = "0.6.2"
 lazy_static = "1.4.0"
 pest = "2.7.7"
 pest_derive = "2.7.7"
 thiserror = "1.0.57"
-tree-sitter = "0.21.0"
-tree-sitter-rox = { path = "./tree-sitter-rox" }
 
 [build-dependencies]
 cc = "*"
-
-[workspace]
-members = ["tree-sitter-rox"]

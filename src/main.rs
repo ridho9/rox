@@ -7,7 +7,13 @@ use color_eyre::eyre::Result;
 use std::io::{self, BufRead, Read, Write};
 
 use interpreter::Interpreter;
-use parser_pest::parse;
+
+use lazy_static::lazy_static;
+
+use crate::ast::AST;
+lazy_static! {
+    static ref PARSE: fn(&str, &str) -> Result<AST> = parser_pest::parse;
+}
 
 fn main() -> Result<()> {
     let mut intp = Interpreter::new();
@@ -38,7 +44,7 @@ fn run_file(intp: &mut Interpreter, filename: &str) -> Result<()> {
 }
 
 fn run_file_content(intp: &mut Interpreter, filename: &str, source: &str) -> Result<()> {
-    let ast = match parse(&filename, &source) {
+    let ast = match PARSE(&filename, &source) {
         Ok(ast) => ast,
         Err(e) => {
             eprintln!("parse error: {}", e);
@@ -69,7 +75,7 @@ fn run_repl(intp: &mut Interpreter) -> Result<()> {
             None => break,
         };
 
-        let ast = match parse(&filename, &source) {
+        let ast = match PARSE(&filename, &source) {
             Ok(ast) => ast,
             Err(e) => {
                 eprintln!("parse error: {}", e);
