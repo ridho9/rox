@@ -2,10 +2,11 @@ program = { SOI ~ statements ~ EOI }
 
 KEYWORD = { "let" | "print" | "true" | "false" | "nil" }
 
-statements      = { statement* }
-statement       = { print_statement | let_statement }
-let_statement   = { "let" ~ ident ~ ("=" ~ expr)? ~ ";" }
-print_statement = { "print" ~ expr ~ ";" }
+statements       = { statement* }
+statement        = { assign_statement | print_statement | let_statement }
+assign_statement = { ident ~ "=" ~ expr ~ ";" }
+let_statement    = { "let" ~ ident ~ ("=" ~ expr)? ~ ";" }
+print_statement  = { "print" ~ expr ~ ";" }
 
 expr = { prefix? ~ primary ~ (infix ~ prefix? ~ primary)* }
 
@@ -36,6 +37,6 @@ char_noesc =  { !("\"" | "\\") ~ ANY }
 char_esc   =  {
     "\\" ~ ("\"" | "\\" | "/" | "n" | "r" | "t")
 }
-ident      = @{ !(KEYWORD ~ !ASCII_ALPHA) ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+ident      = @{ !(KEYWORD ~ !(ASCII_ALPHA | "_")) ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
 
 WHITESPACE = _{ " " | "\t" | NEWLINE }

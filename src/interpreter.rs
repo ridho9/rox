@@ -122,6 +122,19 @@ impl Interpreter {
                 self.env.define(ident.to_string(), val.clone());
                 val
             }
+            Node::AssignStmt(ident, expr) => {
+                match self.env.get(&ident) {
+                    Some(_) => (),
+                    None => {
+                        return Err(RuntimeError {
+                            kind: RuntimeErrorKind::NameError(ident.to_string()),
+                        })
+                    }
+                };
+                let val = self.eval_ast_ref(ast, *expr)?;
+                self.env.define(ident.to_string(), val.clone());
+                val
+            }
         };
         Ok(result)
     }

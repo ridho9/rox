@@ -14,6 +14,7 @@ pub enum Node {
     Statements(Vec<NodeRef>),
     LetStmt(String, Option<NodeRef>),
     PrintStmt(NodeRef),
+    AssignStmt(String, NodeRef),
 }
 
 impl Debug for Node {
@@ -31,6 +32,7 @@ impl Debug for Node {
             Node::PrintStmt(arg0) => write!(f, "Print {:?}", arg0),
             Node::Statements(refs) => write!(f, "Statements {:?}", refs),
             Node::LetStmt(ident, expr) => write!(f, "Let {} {:?}", ident, expr),
+            Node::AssignStmt(ident, expr) => write!(f, "Assign {} {:?}", ident, expr),
         }
     }
 }
@@ -51,6 +53,7 @@ impl Add<usize> for Node {
             PrintStmt(rhs) => PrintStmt(rhs + t),
             Statements(refs) => Statements(refs.into_iter().map(|r| r + t).collect()),
             LetStmt(ident, expr) => LetStmt(ident, expr.map(|r| r + t)),
+            AssignStmt(ident, expr) => AssignStmt(ident, expr + t),
         }
     }
 }
