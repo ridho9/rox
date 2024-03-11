@@ -143,6 +143,14 @@ fn parse_expr(exprs: Pairs<Rule>) -> AST {
                     }
                     result
                 }),
+                Rule::block_expr => {
+                    println!("{:#?}", primary);
+                    let stmts_tree = primary.into_inner();
+                    println!("{:#?}", stmts_tree);
+                    let mut stmts = vec![];
+                    let expr = None;
+                    Node::BlockExpr { stmts, expr }
+                }
                 r => unreachable!("primary rule {:?}", r),
             };
             AST {

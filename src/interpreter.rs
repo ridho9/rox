@@ -22,10 +22,10 @@ impl Interpreter {
     }
 
     pub fn interpret_ast(&mut self, ast: &AST) -> Result<Value, RuntimeError> {
-        self.eval_ast_ref(ast, ast.tailref())
+        self.eval_ast_ref(ast, &ast.tailref())
     }
 
-    fn eval_ast_ref(&mut self, ast: &AST, curref: NodeRef) -> Result<Value, RuntimeError> {
+    fn eval_ast_ref(&mut self, ast: &AST, curref: &NodeRef) -> Result<Value, RuntimeError> {
         let node = ast.at(curref);
         let result = match node {
             Node::Nil => Value::Nil,
@@ -41,15 +41,15 @@ impl Interpreter {
                 }
             },
             Node::UnaryOp(op, rhs) => {
-                let rhs_res = self.eval_ast_ref(ast, *rhs)?;
+                let rhs_res = self.eval_ast_ref(ast, rhs)?;
                 match op {
                     UnaryOp::Neg => (-rhs_res)?,
                     UnaryOp::Not => (!rhs_res)?,
                 }
             }
             Node::BinaryOp(op, lhs_ref, rhs_ref) => {
-                let lhs = self.eval_ast_ref(ast, *lhs_ref)?;
-                let rhs = self.eval_ast_ref(ast, *rhs_ref)?;
+                let lhs = self.eval_ast_ref(ast, lhs_ref)?;
+                let rhs = self.eval_ast_ref(ast, rhs_ref)?;
                 match op {
                     BinaryOp::Add => (lhs + rhs)?,
                     BinaryOp::Sub => (lhs - rhs)?,
@@ -104,19 +104,18 @@ impl Interpreter {
                 }
             }
             Node::PrintStmt(expr) => {
-                let result = self.eval_ast_ref(ast, *expr)?;
-                println!("{}", result);
+                let result = self.eval_ast_ref(ast, expr)?;
                 result
             }
             Node::Statements(refs) => {
                 for stmt_ref in refs {
-                    self.eval_ast_ref(ast, *stmt_ref)?;
+                    self.eval_ast_ref(ast, stmt_ref)?;
                 }
                 Value::Nil
             }
             Node::LetStmt(ident, expr) => {
                 let val = match expr {
-                    Some(val) => self.eval_ast_ref(ast, *val)?,
+                    Some(val) => self.eval_ast_ref(ast, val)?,
                     None => Value::Nil,
                 };
                 self.env.define(ident.to_string(), val.clone());
@@ -131,11 +130,20 @@ impl Interpreter {
                         })
                     }
                 };
-                let val = self.eval_ast_ref(ast, *expr)?;
+                let val = self.eval_ast_ref(ast, expr)?;
                 self.env.define(ident.to_string(), val.clone());
                 val
             }
-            Node::ExprStmt(expr) => self.eval_ast_ref(ast, *expr)?,
+            Node::ExprStmt(expr) => self.eval_ast_ref(ast, expr)?,
+            Node::BlockExpr { stmts, expr } => {
+                for stmt in stmts {
+                    self.eval_ast_ref(ast, stmt)?;
+                }
+                match expr {
+                    Some(e) => self.eval_ast_ref(ast, e)?,
+                    None => Value::Nil,
+                }
+            }
         };
         Ok(result)
     }

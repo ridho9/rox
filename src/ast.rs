@@ -16,6 +16,10 @@ pub enum Node {
     PrintStmt(NodeRef),
     AssignStmt(String, NodeRef),
     ExprStmt(NodeRef),
+    BlockExpr {
+        stmts: Vec<NodeRef>,
+        expr: Option<NodeRef>,
+    },
 }
 
 impl Debug for Node {
@@ -35,6 +39,7 @@ impl Debug for Node {
             Node::LetStmt(ident, expr) => write!(f, "Let {} {:?}", ident, expr),
             Node::AssignStmt(ident, expr) => write!(f, "Assign {} {:?}", ident, expr),
             Node::ExprStmt(arg0) => write!(f, "Expr {:?}", arg0),
+            Node::BlockExpr { stmts, expr } => write!(f, "BlockExpr {:?} {:?}", stmts, expr),
         }
     }
 }
@@ -57,6 +62,10 @@ impl Add<usize> for Node {
             Statements(refs) => Statements(refs.into_iter().map(|r| r + t).collect()),
             LetStmt(ident, expr) => LetStmt(ident, expr.map(|r| r + t)),
             AssignStmt(ident, expr) => AssignStmt(ident, expr + t),
+            BlockExpr { stmts, expr } => BlockExpr {
+                stmts: stmts.into_iter().map(|r| r + t).collect(),
+                expr: expr.map(|r| r + t),
+            },
         }
     }
 }
@@ -169,7 +178,7 @@ impl AST {
         NodeRef(self.list.0.len() - 1)
     }
 
-    pub fn at(&self, curref: NodeRef) -> &Node {
+    pub fn at(&self, curref: &NodeRef) -> &Node {
         self.list.0.get(curref.0).expect("invalid ref")
     }
 

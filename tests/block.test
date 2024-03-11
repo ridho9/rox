@@ -1,6 +1,12 @@
+# basic block expr
+<
 let a = {
     print 1;
     print 2;
     print 3;
 };
-print a;
+$ cargo run -q
+>
+1
+2
+3

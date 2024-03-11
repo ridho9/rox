@@ -9,10 +9,15 @@ let_statement    = { "let" ~ ident ~ ("=" ~ expr)? ~ ";" }
 print_statement  = { "print" ~ expr ~ ";" }
 expr_statement   = { expr_no_block ~ ";" }
 
-expr = { expr_no_block }
+expr = { expr_with_block | expr_no_block }
 
 expr_no_block = _{ op_expr }
 op_expr       = _{ prefix? ~ primary ~ (infix ~ prefix? ~ primary)* }
+
+expr_with_block = _{ block_expr }
+block_expr      =  {
+    "{" ~ statements ~ expr_no_block? ~ "}"
+}
 
 infix = _{ add | sub | mul | div | eqeq | neq | le | lt | ge | gt }
 add   =  { "+" }
