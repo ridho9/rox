@@ -5,3 +5,15 @@ print name;
 $ cargo run -q
 >
 ridho
+
+
+# assignment
+<
+let a = 1;
+print a;
+a = 2;
+print a;
+$ cargo run -q
+>
+1
+2
