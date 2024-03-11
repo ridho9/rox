@@ -283,7 +283,6 @@ name = "rox"
 version = "0.1.0"
 dependencies = [
  "atty",
- "cc",
  "color-eyre",
  "lazy_static",
  "pest",
