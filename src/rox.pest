@@ -3,12 +3,16 @@ program = { SOI ~ statements ~ EOI }
 KEYWORD = { "let" | "print" | "true" | "false" | "nil" }
 
 statements       = { statement* }
-statement        = { assign_statement | print_statement | let_statement }
+statement        = { expr_statement | assign_statement | print_statement | let_statement }
 assign_statement = { ident ~ "=" ~ expr ~ ";" }
 let_statement    = { "let" ~ ident ~ ("=" ~ expr)? ~ ";" }
 print_statement  = { "print" ~ expr ~ ";" }
+expr_statement   = { expr_no_block ~ ";" }
 
-expr = { prefix? ~ primary ~ (infix ~ prefix? ~ primary)* }
+expr = { expr_no_block }
+
+expr_no_block = _{ op_expr }
+op_expr       = _{ prefix? ~ primary ~ (infix ~ prefix? ~ primary)* }
 
 infix = _{ add | sub | mul | div | eqeq | neq | le | lt | ge | gt }
 add   =  { "+" }

@@ -94,6 +94,15 @@ fn parse_statement(mut stmt: Pairs<Rule>) -> AST {
             expr.push_node(Node::AssignStmt(ident, expr_ref), meta);
             expr
         }
+        Rule::expr_statement => {
+            let meta = Metadata {
+                linecol: stmt.as_span().start_pos().line_col(),
+            };
+            let mut expr = parse_expr(stmt.into_inner());
+            let expr_ref = expr.noderef();
+            expr.push_node(Node::ExprStmt(expr_ref), meta);
+            expr
+        }
         rule => unreachable!("rule {:?} {:?}", rule, stmt),
     }
 }

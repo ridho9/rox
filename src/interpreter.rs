@@ -135,6 +135,7 @@ impl Interpreter {
                 self.env.define(ident.to_string(), val.clone());
                 val
             }
+            Node::ExprStmt(expr) => self.eval_ast_ref(ast, *expr)?,
         };
         Ok(result)
     }
